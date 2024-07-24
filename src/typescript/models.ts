@@ -52,4 +52,19 @@ export type GetResponseType<T> =
     //     status: number;
     //     msg: string;
     // }
-    ; 
+;
+
+export type CollectionType = 'casino' | 'live-casino' | 'virtuals' | 'bingo';
+
+export type OutputGameModelType = {
+    id: number;
+    collection: CollectionType;
+    launch_game_id: string;
+    name: string;
+    provider: string;
+    studio_id: string;
+    studio_name: string;
+    upload_date_image_1: string;
+    upload_date_image_2: string;
+    upload_date_image_3: string;
+};

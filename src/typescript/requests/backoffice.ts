@@ -1,8 +1,11 @@
-import { CategoriesAndGamesModel, CategoriesAndGamesModelZod, GetResponseType } from "../models";
+import { CategoriesAndGamesModel, CategoriesAndGamesModelZod, CollectionType, GetResponseType } from "../models";
 import { getParam } from "../utils";
 
+const hostBO = 'https://backoffice.starsports.bet'; // https://backoffice-rhino.stg.rhino-multi.tup-cloud.com/api/session
+const hostProxy = 'https://socket-api-star.prod.sherbetcloud.com'; // /ins/socket-api/api-proxy/staff/casino/management/categories-and-games/${collection}
+
 export const getBearerToken = async(): Promise<GetResponseType<string>> => {
-    const auth_response = await fetch('https://backoffice-rhino.stg.rhino-multi.tup-cloud.com/api/session', {
+    const auth_response = await fetch(`${hostBO}/api/session`, { 
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -15,7 +18,7 @@ export const getBearerToken = async(): Promise<GetResponseType<string>> => {
     });
 
     if (auth_response.status !== 200) {
-        //console.error('get_bearer_token error -> ', auth_response);
+        console.error('getBearerToken error -> ', auth_response.status, '; response: ', auth_response);
         return {
             type: 'error',
             msg: await auth_response.text()
@@ -25,7 +28,7 @@ export const getBearerToken = async(): Promise<GetResponseType<string>> => {
     const bearer_token = auth_response.headers.get('set-cookie');
 
     if (bearer_token === null) {
-        //console.error('get_bearer_token error -> `set-cookie` header not found');
+        console.error('getBearerToken error -> `set-cookie` header not found');
         return {
             type: 'error',
             msg: '`set-cookie` header not found'
@@ -47,14 +50,14 @@ export const getBearerToken = async(): Promise<GetResponseType<string>> => {
     }
 };
 
-export const getCategoriesAndGames = async(): Promise<GetResponseType<CategoriesAndGamesModel>> => {
+export const getCategoriesAndGames = async(collection: CollectionType): Promise<GetResponseType<CategoriesAndGamesModel>> => {
     const bearerTokenResponse = await getBearerToken();
 
     if (bearerTokenResponse.type === 'error') {
         return bearerTokenResponse;
     }
 
-    const response = await fetch('https://webapi.backoffice-rhino.stg.rhino-multi.pbe-cloud.com/ins/socket-api/api-proxy/staff/casino/management/categories-and-games/casino', {
+    const response = await fetch(`${hostProxy}/api-proxy/staff/casino/management/categories-and-games/${collection}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -63,17 +66,29 @@ export const getCategoriesAndGames = async(): Promise<GetResponseType<Categories
         },
     });
 
-    const categoriesAndGames = await response.json();
-
-    const data = CategoriesAndGamesModelZod.safeParse(categoriesAndGames);
-
-    if (data.success) {
+    if (response.status !== 200) {
+        console.error('getCategoriesAndGames error -> ', response.status, '; response: ', response);
         return {
-            type: 'success',
-            data: data.data
-        }
+            type: 'error',
+            msg: await response.text()
+        };
     }
 
+    try {
+        const categoriesAndGames = await response.json();
+        console.log(categoriesAndGames);
+        const data = CategoriesAndGamesModelZod.safeParse(categoriesAndGames);
+
+        if (data.success) {
+            return {
+                type: 'success',
+                data: data.data
+            }
+        }
+    } catch (err) {
+        console.error('-----tu sie wywala');
+    }
+    
     console.error('Invalid data type has been returned.');
 
     return {
