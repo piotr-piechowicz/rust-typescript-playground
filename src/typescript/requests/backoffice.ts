@@ -1,8 +1,14 @@
-import { CategoriesAndGamesModel, CategoriesAndGamesModelZod, CollectionType, GetResponseType } from "../models";
-import { getParam } from "../utils";
+import { CategoriesAndGamesModel, CategoriesAndGamesModelZod, CollectionType, GetResponseType, OutputGameModelType } from "../models";
+import { convertMicrosecondsToDate, getParam } from "../utils";
 
-const hostBO = 'https://backoffice.starsports.bet'; // https://backoffice-rhino.stg.rhino-multi.tup-cloud.com/api/session
-const hostProxy = 'https://socket-api-star.prod.sherbetcloud.com'; // /ins/socket-api/api-proxy/staff/casino/management/categories-and-games/${collection}
+/**
+ * const hostBO = 'https://backoffice.starsports.bet';
+ * const hostProxy = 'https://socket-api-star.prod.sherbetcloud.com';
+ * 
+ */
+
+const hostBO = 'https://backoffice.planetsportbet.com';
+const hostProxy = 'https://webapi.backoffice.planetsportbet.com/ins/socket-api';
 
 export const getBearerToken = async(): Promise<GetResponseType<string>> => {
     const auth_response = await fetch(`${hostBO}/api/session`, { 
@@ -75,8 +81,7 @@ export const getCategoriesAndGames = async(collection: CollectionType): Promise<
     }
 
     try {
-        const categoriesAndGames = await response.json();
-        console.log(categoriesAndGames);
+        const categoriesAndGames = await response.json(); // TODO: add function to safe parse json
         const data = CategoriesAndGamesModelZod.safeParse(categoriesAndGames);
 
         if (data.success) {
@@ -86,7 +91,7 @@ export const getCategoriesAndGames = async(collection: CollectionType): Promise<
             }
         }
     } catch (err) {
-        console.error('-----tu sie wywala');
+        console.error('Error - TODO: add function to safe parse json'); // TODO
     }
     
     console.error('Invalid data type has been returned.');
@@ -96,3 +101,40 @@ export const getCategoriesAndGames = async(collection: CollectionType): Promise<
         msg: 'Invalid data type has been returned.'
     }
 }
+
+export const fetchCollectionGames = async(collection: CollectionType): Promise<Array<OutputGameModelType>> => {
+   const response = await getCategoriesAndGames(collection);
+    
+    if (response.type === 'error') {
+        console.error('Error in getCategoriesAndGames ->', response.msg);
+        return [];
+    }
+
+    const output: Array<OutputGameModelType> = [];
+
+    for (const game of response.data.games) {
+
+        const generation1 = getParam(game.image, "generation", "?")?.split("&")[0] ?? null;
+        const generation2 = getParam(game.image_vertical, "generation", "?")?.split("&")[0] ?? null;
+        const generation3 = getParam(game.image_vertical, "generation", "?")?.split("&")[0] ?? null;
+
+        const generationDate1 = generation1 === null ? '' : convertMicrosecondsToDate(generation1);
+        const generationDate2 = generation2 === null ? '' : convertMicrosecondsToDate(generation2);
+        const generationDate3 = generation3 === null ? '' : convertMicrosecondsToDate(generation3);
+
+        output.push({
+            id: game.id,
+            collection: collection,
+            launch_game_id: game.launch_game_id,
+            name: game.name,
+            provider: game.provider,
+            studio_id: game.studio_id,
+            studio_name: game.studio_name,
+            upload_date_image_1: generationDate1,
+            upload_date_image_2: generationDate2,
+            upload_date_image_3: generationDate3,
+        });
+    }
+
+    return output;
+};
