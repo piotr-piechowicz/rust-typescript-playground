@@ -10,6 +10,7 @@ const runMain = async (): Promise<void> => {
     const bingo = await fetchCollectionGames('bingo');
 
     const allGames = [...casino, ...liveCasino, ...virtuals, ...bingo];
+    //const allGames = [...liveCasino];
 
     // sorting by game.id asc
     allGames.sort((a, b) => {

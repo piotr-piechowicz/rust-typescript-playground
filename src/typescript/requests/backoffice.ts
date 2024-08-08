@@ -2,13 +2,62 @@ import { CategoriesAndGamesModel, CategoriesAndGamesModelZod, CollectionType, Ge
 import { convertMicrosecondsToDate, getParam } from "../utils";
 
 /**
- * const hostBO = 'https://backoffice.starsports.bet';
- * const hostProxy = 'https://socket-api-star.prod.sherbetcloud.com';
- * 
+// Star
+// const hostBO = 'https://backoffice.starsports.bet';
+// const hostProxy = 'https://socket-api-star.prod.sherbetcloud.com';
+// 
+// McBookie
+// const hostBO = 'https://backoffice.mcbookie.com';
+// const hostProxy = 'https://webapi.backoffice.mcbookie.com/ins/socket-api';
+// 
+// Nebet
+// const hostBO = 'https://backoffice.ne-bet.com';
+// const hostProxy = 'https://webapi.backoffice.ne-bet.com/ins/socket-api';
+// 
+// Rhino
+// const hostBO = 'https://backoffice.rhino.bet';
+// const hostProxy = 'https://webapi.backoffice.rhino.bet/ins/socket-api';
+// 
+// Vickers
+// const hostBO = 'https://backoffice.vickers.bet';
+// const hostProxy = 'https://webapi.backoffice.vickers.bet/ins/socket-api';
+// 
+// Betzone
+// const hostBO = 'https://backoffice.betzone.co.uk';
+// const hostProxy = 'https://webapi.backoffice.betzone.co.uk/ins/socket-api';
+// 
+// Planet
+// const hostBO = 'https://backoffice.planetsportbet.com';
+// const hostProxy = 'https://webapi.backoffice.planetsportbet.com/ins/socket-api';
+// 
+// Bresbet
+// const hostBO = 'https://backoffice.bresbet.com';
+// const hostProxy = 'https://webapi.backoffice.bresbet.com/ins/socket-api';
+// 
+// AkBets
+// const hostBO = 'https://backoffice.akbets.bet';
+// const hostProxy = 'https://socket-api-akbets.prod.star-multi.pbe-cloud.com';
+// 
+// Dragonbet
+// const hostBO = 'https://backoffice.dragonbet.co.uk';
+// const hostProxy = 'https://webapi.backoffice.dragonbet.co.uk/ins/socket-api';
+// 
+// GJ
+// const hostBO = 'https://backoffice.gentlemanjim.bet';
+// const hostProxy = 'https://webapi.backoffice.gentlemanjim.bet/ins/socket-api';
+// 
+// Energy
+// const hostBO = 'https://backoffice.nrg.bet';
+// const hostProxy = 'https://webapi.backoffice.nrg.bet/ins/socket-api';
+// 
+// PricedUp
+// const hostBO = 'https://backoffice.pricedup.bet';
+// const hostProxy = 'https://webapi.backoffice.pricedup.bet/ins/socket-api';
+ *
  */
 
-const hostBO = 'https://backoffice.planetsportbet.com';
-const hostProxy = 'https://webapi.backoffice.planetsportbet.com/ins/socket-api';
+const hostBO = 'https://backoffice.pricedup.bet';
+const hostProxy = 'https://webapi.backoffice.pricedup.bet/ins/socket-api';
 
 export const getBearerToken = async(): Promise<GetResponseType<string>> => {
     const auth_response = await fetch(`${hostBO}/api/session`, { 
@@ -125,6 +174,7 @@ export const fetchCollectionGames = async(collection: CollectionType): Promise<A
         output.push({
             id: game.id,
             collection: collection,
+            status: game.published === true ? 'Published' : 'Not Published',
             launch_game_id: game.launch_game_id,
             name: game.name,
             provider: game.provider,

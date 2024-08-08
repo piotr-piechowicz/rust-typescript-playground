@@ -56,9 +56,12 @@ export type GetResponseType<T> =
 
 export type CollectionType = 'casino' | 'live-casino' | 'virtuals' | 'bingo';
 
+type StatusType = 'Published' | 'Not Published';
+
 export type OutputGameModelType = {
     id: number;
     collection: CollectionType;
+    status: StatusType;
     launch_game_id: string;
     name: string;
     provider: string;
